@@ -162,7 +162,7 @@ class Visibility:
                 # show()
 
 
-    def calculate_empty_freespace(self):
+    def calculate_vertexsquence_from_freespace(self):
         free_env_space1 = Polygon(self.env).difference(Polygon(self.obs1))
         free_env_space2 = free_env_space1.difference(Polygon(self.obs2))
         free_env_space = free_env_space2.difference(Polygon(self.obs3))
@@ -199,6 +199,6 @@ class Visibility:
             self.vertex_sequence.append(max_vertex_index)
             tmp_visibility_polygons[max_vertex_index][directions_keys[max_value_count]] = []
             self.visibility_polygons[max_vertex_index][directions_keys[max_value_count]] = 0
-            self.free_space = self.free_space.difference(max_visibilty_polygon)
+            free_space = free_space.difference(max_visibilty_polygon)
 
         print(self.vertex_sequence)

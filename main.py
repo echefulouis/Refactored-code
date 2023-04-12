@@ -22,12 +22,10 @@ def main():
     plt.show()
 
     # Create the visibility Polygons
-    print(new_environment.get_env())
     env_visibility = Visibility(nx_obstacles,graph_points=nx_points,env=new_environment.env,obs1=new_environment.hole1
                                     ,obs2=new_environment.hole2,obs3=new_environment.hole3)
     env_visibility.calculate_visibility_polygons()
-    env_visibility.calculate_empty_freespace()
-
+    env_visibility.calculate_vertexsquence_from_freespace()
     # env_visibility.calculate_visibility_polygons(nx_points)
 
 
