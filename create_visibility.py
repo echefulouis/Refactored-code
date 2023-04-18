@@ -18,7 +18,6 @@ class Visibility:
         self.visibility_polygons = defaultdict(lambda: defaultdict(list))
         self.visibility_polygons_area = defaultdict(lambda: defaultdict(float))
         self.max_sector_visibility_polygon_area = {}
-        self.vertex_sequence=[]
         self.freecell = []
         self.ltable = {}
         self.lvispoly = {}
@@ -29,6 +28,7 @@ class Visibility:
         self.maxc_x=200
         self.maxr_y=300
         self.directions = {31545: [], 45135: [], 135225: [], 225315: []}
+        self.vertex_sequence = []
 
     def polar_point(self,origin_point, angle, distance):
         return [origin_point.x + math.sin(math.radians(angle)) * distance,
@@ -174,6 +174,7 @@ class Visibility:
         directions_keys = list(self.directions.keys())
         count = 0
         max_value_count=0
+        max_sectorcoords_dict = {}
         while not free_space.is_empty:
             count += 1
             max_visibility_area = 0
@@ -196,9 +197,12 @@ class Visibility:
                         max_vertex_index = i
                     value_count += 1
             self.max_sector_visibility_polygon_area[max_vertex_index] = max_visibility_area
+            max_sectorcoords_dict[max_vertex_index] = max_visibilty_polygon_for_view
             self.vertex_sequence.append(max_vertex_index)
             tmp_visibility_polygons[max_vertex_index][directions_keys[max_value_count]] = []
             self.visibility_polygons[max_vertex_index][directions_keys[max_value_count]] = 0
             free_space = free_space.difference(max_visibilty_polygon)
 
-        print(self.vertex_sequence)
+        return max_sectorcoords_dict,self.max_sector_visibility_polygon_area,self.vertex_sequence
+
+

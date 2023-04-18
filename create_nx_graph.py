@@ -6,7 +6,6 @@ from shapely.geometry import LineString, MultiPolygon, Polygon
 from matplotlib.patches import Polygon as MPolygon
 import numpy as np
 
-
 class NetworkxNeighbours:
 
     def __init__(self, networkx_points, new_obstacles, num_neigbours):
