@@ -24,7 +24,8 @@ class Environment:
         self.maxr_y = 300  # number of rows in y
         self.boundary = []
         self.obstacles = []
-        self.raw_data=self.load_environment(filename)
+        self.LineList,self.raw_data=self.load_environment(filename)
+        print(self.LineList)
         self.source = None
         self.dest = None
         self.point_x_cord = []
@@ -45,6 +46,7 @@ class Environment:
         with open(filename, "r") as file_handler:
             raw_data = file_handler.read()
             raw_data = raw_data.split("\n")
+            Linelist = self.parse_input_line(raw_data[0])
             temp = self.parse_input_line(raw_data[0])
             self.boundary = [Point(x, y) for x, y in temp]
             temp = self.parse_input_line(raw_data[len(raw_data) - 1])
@@ -53,7 +55,7 @@ class Environment:
             for i in raw_data[1:len(raw_data) - 1]:
                 self.obstacles.append(Obstacle(self.parse_input_line(i)))
             self.parse_obstacles()
-        return raw_data
+        return Linelist,raw_data
 
 
 

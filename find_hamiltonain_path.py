@@ -101,7 +101,7 @@ class HamiltonianPathFinder:
         nx.draw(Z, pos, with_labels=True)
         plt.show()
 
-    def draw_hamiltonian_circles_on_main_graph(self,h_path, max_sec_coords,obs1,obs2,obs3):
+    def draw_hamiltonian_circles_on_main_graph(self,h_path, max_sec_coords,obs1,obs2,obs3,LineList):
         sub_path_dict = {}
         sub_path_edges = []
         nx_graph = self.R
@@ -140,6 +140,7 @@ class HamiltonianPathFinder:
                 sub_path_edges.extend(list(zip(path, path[1:])))
 
                 ax.add_patch(unitB)
+
         nx.draw(nx_graph, nx_coords, edgelist=sub_path_edges, edge_color='r', width=5.0, with_labels=True)
         # print(sub_path_dict)
 
