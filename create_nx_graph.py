@@ -34,6 +34,9 @@ class NetworkxNeighbours:
         for i, j in self.graph.edges():
             self.graph[i][j]['weight'] = adj_matrix[i, j]
 
+    def get_adj_matrix(self):
+        return pairwise_distances(self.networkx_points, self.networkx_points, metric="euclidean")
+
     def plot_obstacles(self):
         ax = plt.gca()
         for index, i in enumerate(self.new_obstacles):

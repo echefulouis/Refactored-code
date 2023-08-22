@@ -451,7 +451,6 @@ class Environment:
 
     def get_env_graph_points(self):
         graph_points = np.array([self.point_x_cord, self.point_y_cord]).T
-
         return graph_points
 
     def get_env_new_obstacles(self):

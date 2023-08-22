@@ -42,6 +42,7 @@ class HamiltonianPathFinder:
     def _get_hamiltonian_path_with_ratio_as_weights(self, adj_matrix_distance):
         vertex_node = list(self.vertex_sequence_cords.keys())
 
+
         F = nx.Graph()
         for i in range(len(vertex_node)):
             F.add_node(vertex_node[i], pos=self.vertex_sequence_cords[vertex_node[i]])
@@ -142,6 +143,65 @@ class HamiltonianPathFinder:
                 ax.add_patch(unitB)
 
         nx.draw(nx_graph, nx_coords, edgelist=sub_path_edges, edge_color='r', width=5.0, with_labels=True)
-        # print(sub_path_dict)
-
         return sub_path_dict
+
+    def draw_division_on_main_graph(self,divison_dict,obs1,obs2,obs3,LineList):
+        color_options = [
+            '#FFA500',  # Orange
+            'g',  # Green
+            'r',  # Red
+            'b',  # Blue
+            'y',  # Yellow
+            '#800080',  # Purple
+            '#00FFFF',  # Cyan
+            '#FF00FF',  # Magenta
+            '#008000',  # Dark Green
+            '#A52A2A',  # Brown
+            '#FFC0CB',  # Pink
+            '#FFFF00',  # Bright Yellow
+            '#7FFF00',  # Chartreuse
+            '#800000',  # Maroon
+            '#FF4500'  # Orange Red
+        ]
+        nx_graph = self.R
+        nx_coords = self.graph_points
+        fig = figure(figsize=(18, 16))
+        ax = fig.add_subplot(111, aspect='equal', xlabel="S", ylabel="t")
+        ax.set_xlim(-2, 300)
+        ax.set_ylim(-2, 200)
+        for divison in divison_dict:
+            # ax.add_patch(MPolygon(max_sec_coords[num], closed=True, fill=True, color='r', linewidth=0))
+            ax.add_patch(MPolygon(LineList, closed=True, fill=False, color='black', label='line 1', linewidth=3))
+            ax.add_patch(MPolygon(obs1, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+            ax.add_patch(MPolygon(obs2, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+            ax.add_patch(MPolygon(obs3, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+
+            for index, num in enumerate(divison_dict[divison]):
+                if index + 1 == len(divison_dict[divison]):
+                    index=index-1
+                else:
+                    x, y = nx_coords[num[0]][0], nx_coords[num[0]][1]
+                    # print(x,y,num[0])
+                    # a, b = nx_coords[divison_dict[divison][index + 1][0]][0], nx_coords[divison_dict[divison][index + 1][0]][1]
+                    # print(a,b,divison_dict[divison][index + 1][0])
+                    unitA = Circle((x, y), 5, facecolor='none', fill=True, color='blue', edgecolor=(0, 0.8, 0.8),
+                                    linewidth=2,
+                                    alpha=0.5)
+                    # unitB = Circle((a, b), 5, facecolor='none', fill=True, color='blue', edgecolor=(0, 0.8, 0.8),
+                    #                linewidth=2,
+                    #                alpha=0.5)
+                    #
+                    ax.add_patch(unitA)
+                    # ax.add_patch(unitB)
+
+                    nx.draw(nx_graph, nx_coords, with_labels=True)
+                    # Find the shortest path between the nodes
+
+
+            nx.draw(nx_graph, nx_coords, edgelist=divison_dict[divison], edge_color=color_options[divison], width=5.0, with_labels=True)
+            # print(sub_path_dict)
+
+
+
+
+
