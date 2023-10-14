@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from create_visibility import Visibility
 from find_hamiltonain_path import HamiltonianPathFinder
-
+import itertools
 def main():
     #Create Environment
     input_file_name = 'input_file'
@@ -15,13 +15,14 @@ def main():
 
     #Get parameters for Networkx graph of the environment
     nx_points = new_environment.get_env_graph_points()
+    #print(nx_points)
     nx_obstacles= new_environment.get_env_new_obstacles()
 
     # Create the Networx_x Graph
     number_of_neigbours=9
     env_nx_graph = NetworkxNeighbours(nx_points, nx_obstacles, number_of_neigbours)
     G=env_nx_graph.get_neighbours()
-    plt.show()
+    #plt.show()
 
 
     # Create the visibility Polygons
@@ -34,7 +35,7 @@ def main():
 
     #Find Hamiltonain Path
     hamiltonian_path_of_env = HamiltonianPathFinder(G,vertex_sequence,nx_points,max_sector_vpa)
-    adj_matrix = hamiltonian_path_of_env._create_adj_matrix()
+    adj_matrix, adj_mat = hamiltonian_path_of_env._create_adj_matrix()
     hamiltonian_path_with_ratio_graph,hamiltonian_path_with_ratio,hamiltonian_path_with_ratio_edge_distance = hamiltonian_path_of_env._get_hamiltonian_path_with_ratio_as_weights(adj_matrix)
     #hamiltonain_path_with_length_graph,hamiltonain_path_with_length,hamiltonain_path_with_length_edge_distance = hamiltonain_path_of_env._get_hamiltonian_path_with_length()
     hamiltonian_path_of_env.draw_hamiltonian_cycle(hamiltonian_path_with_ratio)
@@ -44,9 +45,8 @@ def main():
     sub_path_dict_from_main_graph = hamiltonian_path_of_env.draw_hamiltonian_circles_on_main_graph(hamiltonian_path_with_ratio,
                                                         sectorcoords_dict,obs1 = new_environment.hole1, obs2 = new_environment.hole2,
                                                         obs3 = new_environment.hole3,LineList=Linelist)
-    plt.show()
+    #plt.show()
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     #Divide the paths into N number of robots
     print(sub_path_dict_from_main_graph)
 
@@ -103,7 +103,7 @@ def main():
 
     total_distance = 0
     for i in range(len(sub_path_list) - 1):
-        print(f"Roboti {i} ")
+        # print(f"Roboti {i} ")
         source = sub_path_list[i]
         target = sub_path_list[i + 1]
         total_distance += env_nx_graph.get_adj_matrix()[source][target]
@@ -146,7 +146,7 @@ def main():
             division_total_distance_list.append(current_division_total_distance)
             division = division+1
             current_division_total_distance=current_division_total_distance-edge_weight
-            # print (division, temp_robot_patrol_edge_list)
+            # print (division, temp_robot_patrol_edge_list)get_adj_matrix()[source][target]
             temp_robot_patrol_edge_list = []
                 #change the start_node to current target
     if (division == number_of_divisions):
@@ -154,16 +154,41 @@ def main():
         division_total_distance_list.append(current_division_total_distance)
         # print(division, temp_robot_patrol_edge_list)
     print (robots_patrol_edges_dict)
-    #robots_patrol_edges_dict[robot] = temp_robot_patrol_edge_list
 
     hamiltonian_path_of_env.draw_division_on_main_graph(divison_dict=robots_patrol_edges_dict,obs1 = new_environment.hole1, obs2 = new_environment.hole2,
                                                         obs3 = new_environment.hole3,LineList=Linelist)
+    divisionl0=set(itertools.chain.from_iterable(robots_patrol_edges_dict[1]))
+    divisionl0=list(divisionl0)
+    print(divisionl0)
+    # print (env_nx_graph.get_adj_matrix()[divisionl0[0]])
+
+    #creating subgraphs based divisions
+    for robot_division in robots_patrol_edges_dict.values():
+        nodes_in_sub_path= list(set(itertools.chain.from_iterable(robot_division)))
+
+        hamiltonian_path_of_env.plot_subgraph_from_main_graph(division=nodes_in_sub_path,
+                                                                           division_edges=robot_division,
+                                                                           obs1=new_environment.hole1,
+                                                                           obs2=new_environment.hole2,
+                                                                           obs3=new_environment.hole3,
+                                                                           LineList=Linelist)
+
+
+    # visited_nodes=[]
+    # for key, value in robots_patrol_edges_dict.items():
+    #     print(key,value)
+    #     nodes_in_sub_path= list(set(itertools.chain.from_iterable(value)))
+    #     visited=hamiltonian_path_of_env.plot_subgraph_from_main_graph(division=nodes_in_sub_path,division_edges= value,obs1 = new_environment.hole1, obs2 = new_environment.hole2,
+    #                                                  obs3 = new_environment.hole3,LineList=Linelist, visited_neigh=visited_nodes)
+    #     visited_nodes.extend(visited)
+
+
+    # adj_main_matrix = hamiltonian_path_of_env.create_adjacent_matrix_of_nx_graph()
     plt.show()
 
-
-
-
-
+## Adjacent matrix with new indexs
+## Coodinate matrix
+## Prunning
 
 
 

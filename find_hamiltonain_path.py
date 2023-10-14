@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from pylab import figure
 from matplotlib.patches import Circle
 from matplotlib.patches import Polygon as MPolygon
-
+import itertools
+import scipy
 
 class HamiltonianPathFinder:
     def __init__(self, nx_graph, vertex_sequence, graph_points,max_sector_visibility_polygon_area):
@@ -21,9 +22,15 @@ class HamiltonianPathFinder:
             vertex_sequence_cord[i] = tuple(self.graph_points.tolist()[i])
         return vertex_sequence_cord
 
+    def remove_edge(self, graph, node_a, node_b):
+        if node_a in graph and node_b in graph:
+            graph[node_a].remove(node_b)
+            graph[node_b].remove(node_a)
+
     def _create_adj_matrix(self):
 
         mat_dist = np.zeros((len(self.vertex_sequence), len(self.vertex_sequence)))
+        mat = np.zeros((len(self.vertex_sequence), len(self.vertex_sequence)))
 
         for i in range(len(self.vertex_sequence)):
             for j in range(len(self.vertex_sequence)):
@@ -35,9 +42,23 @@ class HamiltonianPathFinder:
                     if not path:
                         pass
                     else:
+                        mat[i][j] = 1
                         mat_dist[i][j] = path_length
 
-        return mat_dist
+        return mat_dist,mat
+
+    def create_adjacent_matrix_of_nx_graph(self):
+        G=self.R.copy()
+        MG_Edges = G.edges()
+        MG_Edges = list(MG_Edges)
+        MG_Adj = np.zeros((G.number_of_nodes(), G.number_of_edges()))
+
+        for i in range(G.number_of_edges()):
+            MG_Adj[MG_Edges[i][0]][i] = 1
+            MG_Adj[MG_Edges[i][1]][i] = -1
+        print(MG_Adj)
+
+        return MG_Adj
 
     def _get_hamiltonian_path_with_ratio_as_weights(self, adj_matrix_distance):
         vertex_node = list(self.vertex_sequence_cords.keys())
@@ -163,7 +184,7 @@ class HamiltonianPathFinder:
             '#800000',  # Maroon
             '#FF4500'  # Orange Red
         ]
-        nx_graph = self.R
+        nx_graph = self.R.copy()
         nx_coords = self.graph_points
         fig = figure(figsize=(18, 16))
         ax = fig.add_subplot(111, aspect='equal', xlabel="S", ylabel="t")
@@ -195,13 +216,86 @@ class HamiltonianPathFinder:
                     # ax.add_patch(unitB)
 
                     nx.draw(nx_graph, nx_coords, with_labels=True)
-                    # Find the shortest path between the nodes
-
-
             nx.draw(nx_graph, nx_coords, edgelist=divison_dict[divison], edge_color=color_options[divison], width=5.0, with_labels=True)
             # print(sub_path_dict)
 
+    def plot_subgraph_from_main_graph(self,division,division_edges,obs1,obs2,obs3,LineList):
+        # Get the node neighbours
+
+        first_node=division_edges[0][0]
+        print(f"first node {first_node}")
+        second_to_last_node=division_edges[-1][0]
+        last_node=division_edges[-1][1]
+        print(f"Last node {last_node}")
+        neighbours=[]
+        for node in self.R.nodes():
+            if node in division and (node != first_node and node != last_node):
+                print(node)
+                neighbor_list=[n for n in self.R.neighbors(node)]
+                neighbours.extend(neighbor_list)
+
+        #Make the list of neigbours unique
+        neighbours=list(set(neighbours))
+        print("neigbours ")
+        print(neighbours)
 
 
+        #create a subgraph of the unique list of nodes
+        nx_graph = self.R.subgraph(neighbours).copy()
+        nx_coords = self.graph_points
 
+        index_mapping = {node: i for i , node in enumerate(nx_graph.nodes())}
+        new_nx_cords = [ list(nx_coords[node]) for i, node in enumerate(nx_graph.nodes())]
+
+        I = nx.relabel_nodes(nx_graph,index_mapping,copy=True)
+
+        self.get_adj_matrix(I)
+        new_edge_list = [(index_mapping[u], index_mapping[v]) for u, v in division_edges]
+
+        fig = figure(figsize=(18, 16))
+        ax = fig.add_subplot(111, aspect='equal', xlabel="S", ylabel="t")
+        ax.set_xlim(-2, 300)
+        ax.set_ylim(-2, 200)
+
+        ax.add_patch(MPolygon(LineList, closed=True, fill=False, color='black', label='line 1', linewidth=3))
+        ax.add_patch(MPolygon(obs1, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+        ax.add_patch(MPolygon(obs2, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+        ax.add_patch(MPolygon(obs3, closed=True, fill=True, color='gray', label='line 1', linewidth=2))
+
+        nx.draw(I, new_nx_cords, with_labels=True)
+        nx.draw(I, new_nx_cords, edgelist=new_edge_list, edge_color='b', width=5.0)
+
+
+    def get_adj_matrix(self,sub_graph):
+        MG_Edges = sub_graph.edges()
+        MG_Edges = list(MG_Edges)
+        MG_Adj = np.zeros((sub_graph.number_of_nodes(), sub_graph.number_of_edges()))
+
+        for i in range(sub_graph.number_of_edges()):
+            MG_Adj[MG_Edges[i][0]][i] = 1
+            MG_Adj[MG_Edges[i][1]][i] = -1
+
+        #print(MG_Adj)
+
+        # Open a file for writing Adjacency file
+        # with open('Adj.txt', 'w') as file:
+        #     # Write each row of the matrix to the file, followed by a semicolon
+        #     file.write("[")
+        #     for i, row in enumerate(MG_Adj):
+        #         if i == len(MG_Adj) - 1:
+        #             file.write(" ".join(str(x) for x in row) + "];\n")
+        #         else:
+        #             file.write(" ".join(str(x) for x in row) + ";\n")
+
+    def get_coord_matrix(self, coords_list):
+        print(len(coords_list))
+        with open('cords.txt', 'w') as file:
+            # Write each row of the matrix to the file, followed by a semicolon
+            file.write("[")
+            for i, point in enumerate(coords_list):
+                file.write(" " + (str(point[0])))
+            file.write(";\n")
+            for i, point in enumerate(coords_list):
+                file.write(" " + (str(point[1])))
+            file.write("]';\n")
 
