@@ -1046,8 +1046,8 @@ def main():
 
     #print(max_sector_visibility_polygon_area)
 
-    #print(mat)
-    #print(mat_dist)
+    print(mat)
+    print(mat_dist)
 
 if __name__ == "__main__":
     main()
