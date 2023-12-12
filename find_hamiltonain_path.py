@@ -219,25 +219,31 @@ class HamiltonianPathFinder:
             nx.draw(nx_graph, nx_coords, edgelist=divison_dict[divison], edge_color=color_options[divison], width=5.0, with_labels=True)
             # print(sub_path_dict)
 
-    def plot_subgraph_from_main_graph(self,division,division_edges,obs1,obs2,obs3,LineList):
+    def plot_subgraph_from_main_graph(self,division,division_edges,obs1,obs2,obs3,LineList, visited_nodes,robot_index):
         # Get the node neighbours
-
         first_node=division_edges[0][0]
-        print(f"first node {first_node}")
-        second_to_last_node=division_edges[-1][0]
         last_node=division_edges[-1][1]
-        print(f"Last node {last_node}")
         neighbours=[]
         for node in self.R.nodes():
+            if node in division:
+                neighbours.append(node)
             if node in division and (node != first_node and node != last_node):
-                print(node)
                 neighbor_list=[n for n in self.R.neighbors(node)]
                 neighbours.extend(neighbor_list)
 
         #Make the list of neigbours unique
         neighbours=list(set(neighbours))
-        print("neigbours ")
-        print(neighbours)
+        for node in neighbours:
+            # print(robot_index)
+            # if node == 29:
+            #     print(node in visited_nodes)
+            #     print(node in neighbours)
+            #     print(node)
+            #     print(visited_nodes)
+
+            if node in visited_nodes and node not in division:
+                neighbours.remove(node)
+            visited_nodes.append(node)
 
 
         #create a subgraph of the unique list of nodes
@@ -247,10 +253,15 @@ class HamiltonianPathFinder:
         index_mapping = {node: i for i , node in enumerate(nx_graph.nodes())}
         new_nx_cords = [ list(nx_coords[node]) for i, node in enumerate(nx_graph.nodes())]
 
+
         I = nx.relabel_nodes(nx_graph,index_mapping,copy=True)
 
-        self.get_adj_matrix(I)
+        # Create Coord Matrix and Store in a file
+        self.get_adj_matrix(I,robot_index)
+        self.get_coord_matrix(new_nx_cords,robot_index)
+
         new_edge_list = [(index_mapping[u], index_mapping[v]) for u, v in division_edges]
+        print(list(set(node for edge in new_edge_list for node in edge)))
 
         fig = figure(figsize=(18, 16))
         ax = fig.add_subplot(111, aspect='equal', xlabel="S", ylabel="t")
@@ -264,9 +275,10 @@ class HamiltonianPathFinder:
 
         nx.draw(I, new_nx_cords, with_labels=True)
         nx.draw(I, new_nx_cords, edgelist=new_edge_list, edge_color='b', width=5.0)
+        return visited_nodes
 
 
-    def get_adj_matrix(self,sub_graph):
+    def get_adj_matrix(self,sub_graph,index):
         MG_Edges = sub_graph.edges()
         MG_Edges = list(MG_Edges)
         MG_Adj = np.zeros((sub_graph.number_of_nodes(), sub_graph.number_of_edges()))
@@ -277,19 +289,22 @@ class HamiltonianPathFinder:
 
         #print(MG_Adj)
 
-        # Open a file for writing Adjacency file
-        # with open('Adj.txt', 'w') as file:
-        #     # Write each row of the matrix to the file, followed by a semicolon
-        #     file.write("[")
-        #     for i, row in enumerate(MG_Adj):
-        #         if i == len(MG_Adj) - 1:
-        #             file.write(" ".join(str(x) for x in row) + "];\n")
-        #         else:
-        #             file.write(" ".join(str(x) for x in row) + ";\n")
+        #Open a file for writing Adjacency file
+        filename=f"Adj{index}.txt"
+        print(filename)
 
-    def get_coord_matrix(self, coords_list):
-        print(len(coords_list))
-        with open('cords.txt', 'w') as file:
+        with open(filename, 'w') as file:
+            # Write each row of the matrix to the file, followed by a semicolon
+            file.write("[")
+            for i, row in enumerate(MG_Adj):
+                if i == len(MG_Adj) - 1:
+                    file.write(" ".join(str(x) for x in row) + "];\n")
+                else:
+                    file.write(" ".join(str(x) for x in row) + ";\n")
+
+    def get_coord_matrix(self, coords_list,index):
+        filename = f"cords{index}.txt"
+        with open(filename, 'w') as file:
             # Write each row of the matrix to the file, followed by a semicolon
             file.write("[")
             for i, point in enumerate(coords_list):
@@ -298,4 +313,5 @@ class HamiltonianPathFinder:
             for i, point in enumerate(coords_list):
                 file.write(" " + (str(point[1])))
             file.write("]';\n")
+
 

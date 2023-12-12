@@ -157,38 +157,35 @@ def main():
 
     hamiltonian_path_of_env.draw_division_on_main_graph(divison_dict=robots_patrol_edges_dict,obs1 = new_environment.hole1, obs2 = new_environment.hole2,
                                                         obs3 = new_environment.hole3,LineList=Linelist)
-    divisionl0=set(itertools.chain.from_iterable(robots_patrol_edges_dict[1]))
-    divisionl0=list(divisionl0)
-    print(divisionl0)
-    # print (env_nx_graph.get_adj_matrix()[divisionl0[0]])
 
+    unique_nodes = set()
+    for edge_list in robots_patrol_edges_dict.values():
+        for edge in edge_list:
+
+            node1, node2 = edge
+            unique_nodes.add(node1)
+            unique_nodes.add(node2)
+    unique_nodes_list = list(unique_nodes)
+
+    robot = 0
+    total_number_nodes=0
     #creating subgraphs based divisions
     for robot_division in robots_patrol_edges_dict.values():
+
         nodes_in_sub_path= list(set(itertools.chain.from_iterable(robot_division)))
 
-        hamiltonian_path_of_env.plot_subgraph_from_main_graph(division=nodes_in_sub_path,
+        unique_nodes_list=hamiltonian_path_of_env.plot_subgraph_from_main_graph(division=nodes_in_sub_path,
                                                                            division_edges=robot_division,
                                                                            obs1=new_environment.hole1,
                                                                            obs2=new_environment.hole2,
                                                                            obs3=new_environment.hole3,
-                                                                           LineList=Linelist)
+                                                                           LineList=Linelist, visited_nodes=unique_nodes_list, robot_index=robot)
+
+        robot = robot + 1
 
 
-    # visited_nodes=[]
-    # for key, value in robots_patrol_edges_dict.items():
-    #     print(key,value)
-    #     nodes_in_sub_path= list(set(itertools.chain.from_iterable(value)))
-    #     visited=hamiltonian_path_of_env.plot_subgraph_from_main_graph(division=nodes_in_sub_path,division_edges= value,obs1 = new_environment.hole1, obs2 = new_environment.hole2,
-    #                                                  obs3 = new_environment.hole3,LineList=Linelist, visited_neigh=visited_nodes)
-    #     visited_nodes.extend(visited)
-
-
-    # adj_main_matrix = hamiltonian_path_of_env.create_adjacent_matrix_of_nx_graph()
     plt.show()
 
-## Adjacent matrix with new indexs
-## Coodinate matrix
-## Prunning
 
 
 
